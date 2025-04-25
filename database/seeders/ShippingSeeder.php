@@ -19,6 +19,7 @@ class ShippingSeeder extends Seeder
     {
         $currency = Currency::getDefault();
 
+        // Standard Shipping for UK
         $standardShipping = ShippingMethod::create([
             'name' => 'Standard Shipping',
             'code' => 'STNDRD',
@@ -61,43 +62,7 @@ class ShippingSeeder extends Seeder
             'currency_id' => $currency->id,
         ]);
 
-        // US Shipping
-
-        $usShipping = ShippingMethod::create([
-            'name' => 'US Shipping',
-            'code' => 'USA',
-            'enabled' => true,
-            'driver' => 'ship-by',
-            'data' => [
-                'charge_by' => 'cart_total',
-            ],
-        ]);
-
-        $usShippingZone = ShippingZone::create([
-            'name' => 'America',
-            'type' => 'countries',
-        ]);
-
-        $usShippingRate = ShippingRate::create([
-            'shipping_zone_id' => $usShippingZone->id,
-            'shipping_method_id' => $usShipping->id,
-            'enabled' => true,
-        ]);
-
-        $usShippingZone->countries()->sync(
-            Country::where('iso3', '=', 'USA')->first()->id,
-        );
-
-        Price::create([
-            'priceable_type' => (new ShippingRate)->getMorphClass(),
-            'priceable_id' => $usShippingRate->id,
-            'price' => 5000,
-            'min_quantity' => 1,
-            'currency_id' => $currency->id,
-        ]);
-
-        // European shipping
-
+        // Shipping for 9 European countries
         $euroShipping = ShippingMethod::create([
             'name' => 'Europe Delivery',
             'code' => 'EURO',
@@ -118,31 +83,15 @@ class ShippingSeeder extends Seeder
 
         $euroShippingZone->countries()->sync(
             Country::whereIn('iso3', [
-                'AUT',
-                'BEL',
-                'BGR',
-                'HRV',
-                'CYP',
-                'CZE',
-                'DNK',
-                'EST',
-                'FIN',
-                'FRA',
-                'DEU',
-                'GRC',
-                'HUN',
-                'IRL',
-                'ITA',
-                'LVA',
-                'LTU',
-                'LUX',
-                'MLT',
-                'NLD',
-                'POL',
-                'ROU',
-                'SVK',
-                'ESP',
-                'SWE',
+                'AUT', // Austria
+                'BEL', // Belgium
+                'BGR', // Bulgaria
+                'HRV', // Croatia
+                'CYP', // Cyprus
+                'CZE', // Czech Republic
+                'DNK', // Denmark
+                'EST', // Estonia
+                'FIN', // Finland
             ])->pluck('id'),
         );
 
@@ -153,6 +102,5 @@ class ShippingSeeder extends Seeder
             'min_quantity' => 1,
             'currency_id' => $currency->id,
         ]);
-
     }
 }
