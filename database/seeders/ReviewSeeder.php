@@ -6,16 +6,11 @@ use App\Models\Product;
 use App\Models\Review;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ReviewSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('reviews')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-        DB::statement('ALTER TABLE reviews AUTO_INCREMENT = 1;');
 
         // Ensure there are at least some products
         if (Product::count() === 0) {
@@ -30,7 +25,7 @@ class ReviewSeeder extends Seeder
         }
 
         foreach ($products as $product) {
-            // Ensure each product has at least one review
+            // Add one review from a random user
             $user = User::find($userIds[array_rand($userIds)]);
 
             if (! Review::where('user_id', $user->id)->where('product_id', $product->id)->exists()) {
@@ -39,6 +34,7 @@ class ReviewSeeder extends Seeder
                     'user_id' => $user->id,
                 ]);
 
+                // Attach media if image exists
                 $imageFile = $product->image ?? 'default.jpg';
                 $imagePath = base_path("database/seeders/data/images/{$imageFile}");
 
@@ -49,7 +45,7 @@ class ReviewSeeder extends Seeder
                 }
             }
 
-            // Optionally add extra reviews per product
+            // Add 1–3 extra reviews from random users
             foreach (range(1, rand(1, 3)) as $_) {
                 $extraUser = User::find($userIds[array_rand($userIds)]);
                 if (! Review::where('user_id', $extraUser->id)->where('product_id', $product->id)->exists()) {
